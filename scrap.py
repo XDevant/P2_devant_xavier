@@ -61,7 +61,7 @@ def download_product_data(url, category):
             break
     data[HEADERS[9]] = URL + soup.find('img')['src'].split('..')[-1]
     save_data_to_csv([data[header] for header in HEADERS], category)
-    #download_cover(data[HEADERS[9]])
+    download_cover(data[HEADERS[9]])
 
 
 def save_data_to_csv(data_list, category, append=True):
