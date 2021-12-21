@@ -49,7 +49,10 @@ def download_product_data(url, category):
         data[HEADERS[5]] = '0'
     else:
         data[HEADERS[5]] = stock.text.split('(')[1].split(' ')[0]
-    data[HEADERS[6]] = description.find_next_sibling().text
+    try:
+        data[HEADERS[6]] = description.find_next_sibling().text
+    except AttributeError:
+        data[HEADERS[6]] = ''
     data[HEADERS[7]] = category
     data[HEADERS[8]] = '0'
     for i in range(5):
@@ -58,7 +61,7 @@ def download_product_data(url, category):
             break
     data[HEADERS[9]] = URL + soup.find('img')['src'].split('..')[-1]
     save_data_to_csv([data[header] for header in HEADERS], category)
-    download_cover(data[HEADERS[9]])
+    #download_cover(data[HEADERS[9]])
 
 
 def save_data_to_csv(data_list, category, append=True):
@@ -112,5 +115,5 @@ def main_handler(site_url):
 
 
 if __name__ == "__main__":
-#    main_handler(URL)
-    download_product_data('http://books.toscrape.com/catalogue/robin-war_730/index.html', 'category')
+    main_handler(URL)
+    #download_product_data('http://books.toscrape.com/catalogue/alice-in-wonderland-alices-adventures-in-wonderland-1_5/index.html', 'category')
