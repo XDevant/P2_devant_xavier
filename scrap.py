@@ -27,7 +27,7 @@ HEADERS = ["product_page_url",
 def get_soup(url):
     response = requests.get(url)
     if response.status_code == 200:
-        return BeautifulSoup(response.text, features="html.parser")
+        return BeautifulSoup(response.content, "html.parser")
     return None
 
 
@@ -46,30 +46,37 @@ def download_product_data(url, category):
     data[HEADERS[3]] = tds[2].text
     data[HEADERS[4]] = tds[3].text
     if stock is None:
-        data[HEADERS[5]] = 0
+        data[HEADERS[5]] = '0'
     else:
-        data[HEADERS[5]] = int(stock.text.split('(')[1].split(' ')[0])
+        data[HEADERS[5]] = stock.text.split('(')[1].split(' ')[0]
     data[HEADERS[6]] = description.find_next_sibling().text
     data[HEADERS[7]] = category
-    data[HEADERS[8]] = 0
+    data[HEADERS[8]] = '0'
     for i in range(5):
         if main_soup.find('p', {'class': ratings[i]}) is not None:
-            data[HEADERS[8]] =  i + 1
+            data[HEADERS[8]] =  str(i + 1)
             break
     data[HEADERS[9]] = URL + soup.find('img')['src'].split('..')[-1]
-    print([data[header] for header in HEADERS])
-    #save_data_to_csv([data[header] for header in HEADERS], category)
-    #download_cover(data[HEADERS[9]])
+    save_data_to_csv([data[header] for header in HEADERS], category)
+    download_cover(data[HEADERS[9]])
 
 
-def save_data_to_csv(data_list, category):
-    row = ",".join(data_list)
-    with open(f'data/csv/{category}.csv', 'w') as file:
+def save_data_to_csv(data_list, category, append=True):
+    row = "|".join(data_list)
+    if append:
+        mode = 'a'
+    else:
+        mode = 'w'
+    with open(f'data/csv/{category}.csv', mode) as file:
         file.write(row)
 
 
 def download_cover(image_url):
-    pass
+    name = image_url.split('/')[-1]
+    response = requests.get(image_url)
+    if response.status_code == 200:
+        with open(f'data/img/{name}', 'wb') as file:
+            file.write(response.content)
 
 
 def get_product_urls(url):
@@ -96,10 +103,11 @@ def get_category_urls(url):
 
 def main_handler(site_url):
     category_urls = get_category_urls(site_url)
-    for category_url in category_urls:
+    for category_url in category_urls[3]:
         category = category_url.split('_')[0].split('/')[-1]
+        save_data_to_csv(HEADERS, category, append=False)
         product_urls = get_product_urls(category_url)
-        for product_url in product_urls:
+        for product_url in product_urls[:3]:
             download_product_data(product_url, category)
 
 
@@ -108,5 +116,6 @@ if __name__ == "__main__":
     product0_links = get_product_urls(links[0])
     print(product0_links)
     product1_links = get_product_urls(links[1])
-    print(product1_links)"""
-    download_product_data('http://books.toscrape.com/catalogue/its-only-the-himalayas_981/index.html', 'travel')
+    print(product1_links)
+    download_product_data('http://books.toscrape.com/catalogue/its-only-the-himalayas_981/index.html', 'travel')"""
+    main_handler(URL)
