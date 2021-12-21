@@ -32,10 +32,34 @@ def get_soup(url):
 
 
 def download_product_data(url, category):
-    data_dict = {}
+    data = {}
+    ratings = ['One', 'Two', 'Three', 'Four', 'Five']
+    soup = get_soup(url).find('article', {'class': 'product_page'})
+    main_soup = soup.find('div', {'class': 'product_main'})
+    stock = main_soup.find('p', {'class': 'instock availability'})
+    tds = soup.findAll('td')
+    description = soup.find('div', {'id': 'product_description'})
 
-    save_data_to_csv([data_dict[header] for header in HEADERS], category)
-    download_cover(data_dict[HEADERS[10]])
+    data[HEADERS[0]] = url
+    data[HEADERS[1]] = tds[0].text
+    data[HEADERS[2]] = main_soup.find('h1').text
+    data[HEADERS[3]] = tds[2].text
+    data[HEADERS[4]] = tds[3].text
+    if stock is None:
+        data[HEADERS[5]] = 0
+    else:
+        data[HEADERS[5]] = int(stock.text.split('(')[1].split(' ')[0])
+    data[HEADERS[6]] = description.find_next_sibling().text
+    data[HEADERS[7]] = category
+    data[HEADERS[8]] = 0
+    for i in range(5):
+        if main_soup.find('p', {'class': ratings[i]}) is not None:
+            data[HEADERS[8]] =  i + 1
+            break
+    data[HEADERS[9]] = URL + soup.find('img')['src'].split('..')[-1]
+    print([data[header] for header in HEADERS])
+    #save_data_to_csv([data[header] for header in HEADERS], category)
+    #download_cover(data[HEADERS[9]])
 
 
 def save_data_to_csv(data_list, category):
@@ -76,12 +100,13 @@ def main_handler(site_url):
         category = category_url.split('_')[0].split('/')[-1]
         product_urls = get_product_urls(category_url)
         for product_url in product_urls:
-            dowload_product_data(product_url, category)
+            download_product_data(product_url, category)
 
 
 if __name__ == "__main__":
-    links = get_category_urls(URL)
+    """links = get_category_urls(URL)
     product0_links = get_product_urls(links[0])
     print(product0_links)
     product1_links = get_product_urls(links[1])
-    print(product1_links)
+    print(product1_links)"""
+    download_product_data('http://books.toscrape.com/catalogue/its-only-the-himalayas_981/index.html', 'travel')
