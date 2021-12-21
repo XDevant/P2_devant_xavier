@@ -62,7 +62,7 @@ def download_product_data(url, category):
 
 
 def save_data_to_csv(data_list, category, append=True):
-    row = "|".join(data_list)
+    row = "|".join(data_list) + "\n"
     if append:
         mode = 'a'
     else:
@@ -103,19 +103,13 @@ def get_category_urls(url):
 
 def main_handler(site_url):
     category_urls = get_category_urls(site_url)
-    for category_url in category_urls[3]:
+    for category_url in category_urls:
         category = category_url.split('_')[0].split('/')[-1]
         save_data_to_csv(HEADERS, category, append=False)
         product_urls = get_product_urls(category_url)
-        for product_url in product_urls[:3]:
+        for product_url in product_urls:
             download_product_data(product_url, category)
 
 
 if __name__ == "__main__":
-    """links = get_category_urls(URL)
-    product0_links = get_product_urls(links[0])
-    print(product0_links)
-    product1_links = get_product_urls(links[1])
-    print(product1_links)
-    download_product_data('http://books.toscrape.com/catalogue/its-only-the-himalayas_981/index.html', 'travel')"""
     main_handler(URL)
