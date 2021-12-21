@@ -62,12 +62,12 @@ def download_product_data(url, category):
 
 
 def save_data_to_csv(data_list, category, append=True):
-    row = "|".join(data_list) + "\n"
+    row = ("|".join(data_list) + "\n")
     if append:
         mode = 'a'
     else:
         mode = 'w'
-    with open(f'data/csv/{category}.csv', mode) as file:
+    with open(f'data/csv/{category}.csv', mode, encoding="utf-8") as file:
         file.write(row)
 
 
@@ -112,4 +112,5 @@ def main_handler(site_url):
 
 
 if __name__ == "__main__":
-    main_handler(URL)
+#    main_handler(URL)
+    download_product_data('http://books.toscrape.com/catalogue/robin-war_730/index.html', 'category')
