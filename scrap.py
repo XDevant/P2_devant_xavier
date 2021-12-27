@@ -103,9 +103,14 @@ def save_data_to_csv(data_list, category, mode='a'):
         Int: 1 for success 0 for failure
     """
     row = ("|".join(data_list) + "\n")
-    with open(f'{CSV_FOLDER}/{category}.csv', mode, encoding="utf-8") as f:
-        f.write(row)
-    return 1
+    name = f'{CSV_FOLDER}/{category}.csv'
+    try:
+        with open(name, mode, encoding="utf-8") as f:
+            f.write(row)
+        return 1
+    except Exception:
+        print(f"Unable to save {row} in {name}")
+        return 0
 
 
 def get_product_data(url, category):
@@ -121,32 +126,51 @@ def get_product_data(url, category):
     if soup is None:
         return('', '')
     soup = soup.find('article', {'class': 'product_page'})
-    main_soup = soup.find('div', {'class': 'product_main'})
-
-    title = main_soup.find('h1').text
-    stock = main_soup.find('p', {'class': 'instock availability'})
+    if soup is None:
+        return('', '')
+    try:
+        title = soup.find('h1').text
+    except AttributeError:
+        print(f"Title missing for {url} in {category}.csv")
+        title = ''
+    
+    stock = soup.find('p', {'class': 'instock availability'})
     if stock is None:
         stock = '0'
     else:
-        stock = stock.text.split('(')[1].split(' ')[0]
+        try:
+            stock = stock.text.split('(')[1].split(' ')[0]
+        except IndexError:
+            print(f"Unable to extract stocks: {url} in {category}.csv")
+            stock = '0'
+    
     tds = soup.findAll('td')
     if tds is None or (len(tds) < 4):
         print(f"Missing data in table: {url} in {category}.csv")
         tds = ['']*4
     else:
         tds = [td.text for td in tds[:4]]
+    
     try:
         description = soup.find('div', {'id': 'product_description'})
         description = description.find_next_sibling().text
     except AttributeError:
         print(f"Description missing for {url} in {category}.csv")
         description = ''
+    
     ratings = '0'
     for i in range(5):
-        if main_soup.find('p', {'class': RATINGS[i]}) is not None:
+        if soup.find('p', {'class': RATINGS[i]}) is not None:
             ratings =  str(i + 1)
             break
-    img_url = URL + soup.find('img')['src'].split('..')[-1]
+    
+    img_url = ''
+    try:
+        img_url = URL + soup.find('img')['src'].split('..')[-1]
+    except AttributeError:
+        print(f"Image URL missing for {url} in {category}.csv")
+    except IndexError:
+        print(f"Corrupt image URL for {url} in {category}.csv")
 
     return ([url, tds[0], title, tds[2], tds[3], stock, description, category, ratings, img_url], img_url)
 
@@ -162,10 +186,16 @@ def get_product_urls(url):
     next_url = url
     urls = []
     while next:
-        soup = get_soup(next_url).find('section').find('ol')
+        soup = get_soup(next_url)
         if soup is None:
             return urls
-        links = soup.findAll('li')
+        soup = soup.find('section')
+        if soup is None:
+            return urls
+        link_soup = soup.find('ol')
+        if link_soup is None:
+            return urls
+        links = link_soup.findAll('li')
         for link in links:
             li = link.find('a')
             product_url = URL_PRODUCT + li['href'].split('..')[-1]
@@ -175,7 +205,8 @@ def get_product_urls(url):
             next = False
         else:
             link = next_soup.find('a')['href']
-            next_url = '/'.join(url.split('/')[:-1].append(link))
+            print(url.split('/')[:-1] + [link])
+            next_url = '/'.join(url.split('/')[:-1] + [link])
     return urls
 
 
@@ -215,17 +246,15 @@ def main_handler(site_url):
     category_urls = get_category_urls(site_url)
     if len(category_urls) == 0:
         print(f"Unable to extract category pages urls. Scrapping aborted")
-    for category_url in category_urls[:2]:
+    for category_url in category_urls:
         category = category_url.split('_')[0].split('/')[-1]
         save_data_to_csv(HEADERS, category, mode = 'w')
         product_urls = get_product_urls(category_url)
-        for product_url in product_urls[:2]:
+        for product_url in product_urls:
             (data, image_url) = get_product_data(product_url, category)
-            save_data_to_csv(data, category)
+            saved_data += save_data_to_csv(data, category)
             if data == '':
                 print(f"Data not found for {product_url} in {category}.csv")
-            else:
-                saved_data += 1
             if image_url == '':
                 print(f"Image url not found for {product_url}")
             else:
