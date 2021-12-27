@@ -205,7 +205,6 @@ def get_product_urls(url):
             next = False
         else:
             link = next_soup.find('a')['href']
-            print(url.split('/')[:-1] + [link])
             next_url = '/'.join(url.split('/')[:-1] + [link])
     return urls
 
