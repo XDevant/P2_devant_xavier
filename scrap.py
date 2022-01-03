@@ -7,8 +7,8 @@ import pandas as pd
 URL = "http://books.toscrape.com"
 URL_PRODUCT = URL + '/catalogue'
 
-CSV_FOLDER = "Books-to-scrape/CSV"
-IMG_FOLDER = "Books-to-scrape/Img"
+CSV_FOLDER = "Books-to-scrape\\CSV\\"
+IMG_FOLDER = "Books-to-scrape\\Img\\"
 """ Path of the folders where extracted data will be saved"""
 
 RATINGS = ['One', 'Two', 'Three', 'Four', 'Five']
@@ -269,7 +269,7 @@ def main_handler(site_url):
     category_urls = get_category_urls(site_url)
     if len(category_urls) == 0:
         print(f"Unable to extract category pages urls. Scrapping aborted")
-    for category_url in category_urls:
+    for category_url in category_urls[:5]:
         category = category_url.split('_')[0].split('/')[-1]
         save_data_to_csv(HEADERS, category, mode = 'w')
         product_urls = get_product_urls(category_url)
@@ -287,7 +287,7 @@ def main_handler(site_url):
     print(f"Successfuly saved {saved_img} / 1000 images into files")
 
 if __name__ == "__main__":
-    #main_handler(URL)
+    main_handler(URL)
     img_files = glob.glob(IMG_FOLDER + "/" + "*.jpg")
     print(f"{len(img_files)} found in img folder")
     csv_files = glob.glob(CSV_FOLDER + "/" + "*.csv")
