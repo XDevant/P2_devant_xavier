@@ -1,7 +1,8 @@
 from os import makedirs
+import glob
 import requests
 from bs4 import BeautifulSoup
-
+import pandas as pd
 
 URL = "http://books.toscrape.com"
 URL_PRODUCT = URL + '/catalogue'
@@ -59,6 +60,8 @@ def get_url_content(url):
     except requests.exceptions.MissingSchema:
         print(f"Unable to fetch {url}: Not an URL")
         return None
+    except requests.exceptions.ChunkedEncodingError:
+        print(f"Connection broken while requesting {url}") 
     if response.status_code == 200:
         return response.content
     print(f"Unable to fetch {url} code:{response.status_code}")
@@ -279,21 +282,23 @@ def main_handler(site_url):
                 print(f"Image url not found for {product_url}")
             else:
                 saved_img += download_cover(image_url)
+    print(f"{len(category_urls)} extracted / 50")
     print(f"Successfuly saved {saved_data} / 1000 products into csv")
     print(f"Successfuly saved {saved_img} / 1000 images into files")
 
 if __name__ == "__main__":
-    main_handler(URL)
+    #main_handler(URL)
+    img_files = glob.glob(IMG_FOLDER + "/" + "*.jpg")
+    print(f"{len(img_files)} found in img folder")
+    csv_files = glob.glob(CSV_FOLDER + "/" + "*.csv")
+    print(f"{len(csv_files)} found in csv folder")
+    for file in csv_files:
+        df = pd.read_csv(file, delimiter="|")
+        #df.info()
+        #print(df.isna().sum())
+        missing_data = df.isna().sum().sum()
+        if missing_data > 0:
+            print(f"{missing_data} missing_data in {file}")
 
-    #create_folders()
-    #print("test1 ok")
-    #create_folders()
-    #print("test2 ok")
-    #get_soup('http://fofo.com')
-    #print("test3 ok")
-    #get_soup('http://')
-    #print("test4 ok")
-    #get_soup('')
-    #print("test5 ok")
-    #soup = get_soup(URL)
-    #print("test6 ok")
+
+
