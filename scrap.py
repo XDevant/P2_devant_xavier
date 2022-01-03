@@ -31,8 +31,13 @@ def create_folders():
     Creates folders to store data and images.
     Return: nothing
     """
-    makedirs(CSV_FOLDER, exist_ok=True)
-    makedirs(IMG_FOLDER, exist_ok=True)
+    try:
+        makedirs(CSV_FOLDER, exist_ok=True)
+        makedirs(IMG_FOLDER, exist_ok=True)
+        return 1
+    except Exception:
+        print("Unable to create folders to save data !")
+        return 0
 
 
 def get_url_content(url):
@@ -70,7 +75,10 @@ def get_soup(url):
     """
     content = get_url_content(url)
     if content is not None:
-        return BeautifulSoup(content, "html.parser")
+        try:
+            return BeautifulSoup(content, "html.parser")
+        except Exception:
+           print(f"Unable to parse html for {url}")
     return None
 
 
@@ -85,9 +93,12 @@ def download_cover(url):
     name = url.split('/')[-1]
     content = get_url_content(url)
     if content is not None:
-        with open(f'{IMG_FOLDER}/{name}', 'wb') as file:
-            file.write(content)
-        return 1
+        try:
+            with open(f'{IMG_FOLDER}/{name}', 'wb') as file:
+                file.write(content)
+            return 1
+        except Exception:
+            print(f"Unable to save cover image for {name}")
     return 0
 
 
@@ -123,11 +134,11 @@ def get_product_data(url, category):
          and the url of the book cover image.
     """
     soup = get_soup(url)
+    if soup is not None:
+        soup = soup.find('article', {'class': 'product_page'})
     if soup is None:
         return('', '')
-    soup = soup.find('article', {'class': 'product_page'})
-    if soup is None:
-        return('', '')
+    
     try:
         title = soup.find('h1').text
     except AttributeError:
@@ -145,14 +156,14 @@ def get_product_data(url, category):
             stock = '0'
     
     tds = soup.findAll('td')
-    if tds is None or (len(tds) < 4):
+    try:
+        tds = [td.text for td in tds[:4]]
+    except (AttributeError, IndexError):
         print(f"Missing data in table: {url} in {category}.csv")
         tds = ['']*4
-    else:
-        tds = [td.text for td in tds[:4]]
-    
+        
+    description = soup.find('div', {'id': 'product_description'})
     try:
-        description = soup.find('div', {'id': 'product_description'})
         description = description.find_next_sibling().text
     except AttributeError:
         print(f"Description missing for {url} in {category}.csv")
@@ -186,26 +197,30 @@ def get_product_urls(url):
     next_url = url
     urls = []
     while next:
-        soup = get_soup(next_url)
-        if soup is None:
+        try:
+            soup = get_soup(next_url).find('section')
+            link_soup = soup.find('ol')
+            links = link_soup.findAll('li')
+        except AttributeError:
+            print(f"Unable to extract product urls for {url}")
             return urls
-        soup = soup.find('section')
-        if soup is None:
-            return urls
-        link_soup = soup.find('ol')
-        if link_soup is None:
-            return urls
-        links = link_soup.findAll('li')
         for link in links:
             li = link.find('a')
-            product_url = URL_PRODUCT + li['href'].split('..')[-1]
-            urls.append(product_url)
+            try:
+                product_url = URL_PRODUCT + li['href'].split('..')[-1]
+                urls.append(product_url)
+            except (AttributeError, IndexError):
+                print(f"Corrupt product url: {li}")
         next_soup = soup.find('li', {'class': 'next'})
         if next_soup is None:
             next = False
         else:
-            link = next_soup.find('a')['href']
-            next_url = '/'.join(url.split('/')[:-1] + [link])
+            try:
+                link = next_soup.find('a')['href']
+                next_url = '/'.join(url.split('/')[:-1] + [link])
+            except (AttributeError, IndexError):
+                next = False
+                print(f"Next page's URL not found:{next_url}")
     return urls
 
 
@@ -223,11 +238,17 @@ def get_category_urls(url):
     if soup is None:
         print(f"Unable to find nav container")
         return []
-    links = soup.findAll('a')
-    if len(links) < 2:
+    links_soup = soup.findAll('a')
+    if len(links_soup) < 2:
         print(f"No link in nav container")
         return []
-    return [URL + '/' + a['href'] for a in links[1:]]
+    links = []
+    for a in links_soup[1:]:
+        try:
+            links.append(URL + '/' + a['href'])
+        except AttributeError:
+            print(f"category link corrup: {a}")
+    return links
 
 
 def main_handler(site_url):
@@ -253,7 +274,7 @@ def main_handler(site_url):
             (data, image_url) = get_product_data(product_url, category)
             saved_data += save_data_to_csv(data, category)
             if data == '':
-                print(f"Data not found for {product_url} in {category}.csv")
+                print(f"No data for {product_url} in {category}.csv")
             if image_url == '':
                 print(f"Image url not found for {product_url}")
             else:
