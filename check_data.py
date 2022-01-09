@@ -1,24 +1,3 @@
-def read_error_dict(err_dict, file):
-    """
-    Args:
-        dict with int values
-        String: file name
-    Count errors and prints then on the console
-    Return: 
-        (Int, Int) : individual and global error counts
-    """
-    total_errors = 0
-    parsing_errors = 0
-    for key, value in err_dict.items():
-        if value == -1:
-            print(f"Unable to parse books with {key} in {file}")
-            parsing_errors += 1
-        if value > 0:
-            total_errors += value
-            print(f"{value} book with {key} in {file}")
-    return (total_errors, parsing_errors)
-
-
 def check_headers(df, headers, col, file):
     """
     Args:
@@ -43,62 +22,87 @@ def build_error_dict(df, img_files, img_path):
     Args:
         Panda Dataframe
         List of String (file names)
-    
+    Add booléan rows to df after checking data.
+    Build repport as error dict.
     Return: 
-        (Panda Dataframe, Dict)
+        (Panda Dataframe, Dict); the input df and an error dict
     """
     err_dict = {}
-    if 'float' in str(df['price_including_tax'].dtypes):
+
+    try:
         df['no_tax'] = df.apply(
                         lambda row: not row['price_including_tax'] > 0,
                         axis=1
                         )
-        corrupt_tax_df = df[df['no_tax'] == True]
-        err_dict['no_tax'] = corrupt_tax_df.shape[0]
-    else:
+        err_dict['no_tax'] = df[df['no_tax'] == True].shape[0]
+    except Exception:
         df['no_tax'] = False
         err_dict['no_tax'] = -1
-    if 'float' in str(df['price_excluding_tax'].dtypes):
+
+    try:
         df['no_taxfree'] = df.apply(
                         lambda row: not row['price_excluding_tax'] > 0,
                         axis=1
                         )
-        corrupt_taxfree_df = df[df['no_taxfree'] == True]
-        err_dict['no_taxfree'] = corrupt_taxfree_df.shape[0]
-    else:
+        err_dict['no_taxfree'] = df[df['no_taxfree'] == True].shape[0]
+    except Exception:
         df['no_taxfree'] = False
         err_dict['no_taxfree'] = -1
-    if 'int' in str(df['number_available'].dtypes):
-        df['unavailable'] = df.apply(
+
+    try:
+        df['no_stock'] = df.apply(
                         lambda row: not (row['number_available'] > 0),
                         axis=1
                         )
-        unavailable_df = df[df['unavailable'] == True]
-        err_dict['unavailable'] = unavailable_df.shape[0]
-    else:
-        df['unavailable'] = False
-        err_dict['unavailable'] = -1
-    if 'int' in str(df['review_rating'].dtypes):
-        df['unrated'] = df.apply(
+        unavailable_df = df[df['no_stock'] == True]
+        err_dict['no_stock'] = unavailable_df.shape[0]
+    except Exception:
+        df['no_stock'] = False
+        err_dict['no_stock'] = -1
+
+    try:
+        df['no_rating'] = df.apply(
                         lambda row:
-                         row['review_rating'] not in range(1,6)
+                         int(row['review_rating']) not in range(1,6)
                         , axis=1
                         )
-        unrated_df = df[df['unrated'] == True]
-        err_dict['unrated'] = unrated_df.shape[0]
-    else:
-        df['unrated'] = False
-        err_dict['unrated'] = -1
+        err_dict['no_rating'] = df[df['no_rating'] == True].shape[0]
+    except Exception:
+        df['no_rating'] = False
+        err_dict['no_rating'] = -1
+
     try:
         df['no_upc'] = df.apply(
             lambda row: len(row['universal_product_code']) != 16
             , axis=1
             )
-        corrupt_upc_df = df[df['no_upc'] == True]
-        err_dict['no_upc'] = corrupt_upc_df.shape[0]
+        err_dict['no_upc'] = df[df['no_upc'] == True].shape[0]
     except Exception:
         df['no_upc'] = False
         err_dict['no_upc'] = -1
+
+    try:
+        df['no_title'] = df.apply(
+            lambda row: row['product_page_url']
+                .split('_')[0]
+                .split('/')[-1]
+                .split('-')[0] != ''.join(''.join(''.join(''
+                                        .join(row['title']
+                                            .split(' ')[0]
+                                            .split('-')[0]
+                                            .lower().strip('(,:#.%')
+                                            .split('\'')
+                                            ).split(',')
+                                            ).split('/')
+                                            ).split(')')
+                                            )
+            , axis=1
+            )
+        err_dict['no_title'] = df[df['no_title'] == True].shape[0]
+    except Exception:
+        df['no_title'] = False
+        err_dict['no_title'] = -1
+
     try:
         df['no_description'] = df.apply(
             lambda row: len(row['product_description']) < 2
@@ -109,14 +113,14 @@ def build_error_dict(df, img_files, img_path):
     except Exception:
         df['no_description'] = False
         err_dict['no_description'] = -1
+        
     try:
         df['no_cover'] = df.apply(
             lambda r:
             img_path + r['image_url'].split('/')[-1] not in img_files
             , axis=1
             )
-        no_cover_df = df[df['no_cover'] == True]
-        err_dict['no_cover'] = no_cover_df.shape[0]
+        err_dict['no_cover'] = df[df['no_cover'] == True].shape[0]
     except Exception:
         df['no_cover'] = False
         err_dict['no_cover'] = -1

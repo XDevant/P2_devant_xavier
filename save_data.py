@@ -58,7 +58,7 @@ def build_err_df(df, list_of_keys):
     return err_df.drop_duplicates()
 
 
-def save_data_to_csv(data_list, name, mode='a'):
+def save_to_csv(data_list, name, mode='a'):
     """
     Args:
         List of Strings (product date),
@@ -69,6 +69,8 @@ def save_data_to_csv(data_list, name, mode='a'):
     Return
         Int: 1 for success 0 for failure
     """
+    if len(data_list) == 0:
+        data_list = ['-', '-', '-', 0, 0, 0, '-','-', 0, '-']
     row = ("|".join(data_list) + "\n")
     try:
         with open(name, mode, encoding="utf-8") as f:
@@ -77,3 +79,23 @@ def save_data_to_csv(data_list, name, mode='a'):
     except Exception:
         print(f"Unable to save {row} in {name}")
         return 0
+
+def dfs_concat_to_csv(error_dfs, path, name='error_log.csv'):
+    path_name = path.strip('\\')
+    counted = -1
+    saved = -1
+    try:
+        error_df = pd.concat(error_dfs)
+        counted = error_df.shape[0]
+        if counted == 0:
+            return(0, 0)
+    except Exception:
+        print(f"Unable to oncat error df")
+    else:
+        try:
+            error_df.to_csv(path + name, sep='|')
+            print(f"An error log has been created in {path_name}")
+            saved = counted
+        except Exception:
+            print(f"Unable to create an error log in {path_name}")
+    return (counted, saved)

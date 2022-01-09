@@ -66,7 +66,7 @@ def get_product_urls(url, base_product):
     return urls
 
 
-def get_product_data(url, category, base_url):
+def get_data(url, category, base_url):
     """
     Args:
         String: the URL of a product page.
@@ -79,7 +79,7 @@ def get_product_data(url, category, base_url):
     if soup is not None:
         soup = soup.find('article', {'class': 'product_page'})
     if soup is None:
-        return('', '-')
+        return([], '-')
     
     try:
         title = soup.find('h1').text
