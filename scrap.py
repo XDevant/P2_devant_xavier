@@ -56,7 +56,7 @@ def main_handler(site_url):
                 data = ['-', '-', '-', 0, 0, 0, '-', '-', 0, '-']
                 print(f"No data for {product_url} in {category}.csv")
             saved_data += save_data_to_csv(data, csv_name)
-            if image_url == '':
+            if image_url == '-':
                 print(f"Image url not found for {product_url}")
             else:
                 saved_img += download_cover(image_url, IMG_FOLDER)
@@ -113,21 +113,14 @@ def check_extracted_files():
             print(f"{file} is skipped: unable to parse for errors")
             continue
 
+        total_err, parsing_err = read_error_dict(err_dict, file)
         if err_dict['no_cover'] >= 0:
-            result_dict['checked_covers'] += book_count 
+            result_dict['checked_covers'] += book_count
             result_dict['checked_covers'] -= err_dict['no_cover']
-
-        try:
-            total_err, parsing_err = read_error_dict(err_dict, file)
-        except Exception:
-            print(f"{file} is skipped: unable to count errors")
-            continue
-
         if total_err == 0 and parsing_err == 0:
             result_dict['perfect_files'] += 1
             result_dict['perfect_books'] += book_count
             continue
-
         if total_err > 0:
             err_df = build_err_df(df, err_dict.keys())
             try:

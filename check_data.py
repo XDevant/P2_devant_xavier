@@ -101,8 +101,7 @@ def build_error_dict(df, img_files, img_path):
         err_dict['no_upc'] = -1
     try:
         df['no_description'] = df.apply(
-            lambda row:
-             'float' in str(type(row['product_description']))
+            lambda row: len(row['product_description']) < 2
             , axis=1
             )
         description_df = df[df['no_description'] == True]

@@ -79,13 +79,13 @@ def get_product_data(url, category, base_url):
     if soup is not None:
         soup = soup.find('article', {'class': 'product_page'})
     if soup is None:
-        return('', '')
+        return('', '-')
     
     try:
         title = soup.find('h1').text
     except AttributeError:
         print(f"Title missing for {url} in {category}.csv")
-        title = ''
+        title = '-'
     
     stock = soup.find('p', {'class': 'instock availability'})
     if stock is None:
@@ -102,14 +102,14 @@ def get_product_data(url, category, base_url):
         tds = [td.text.strip('£') for td in tds[:4]]
     except (AttributeError, IndexError):
         print(f"Missing data in table: {url} in {category}.csv")
-        tds = ['']*4
+        tds = ['-', 0, 0, 0]
         
     description = soup.find('div', {'id': 'product_description'})
     try:
         description = description.find_next_sibling().text
     except AttributeError:
         print(f"Description missing for {url} in {category}.csv")
-        description = ''
+        description = '-'
 
     ratings = ['One', 'Two', 'Three', 'Four', 'Five']
     rating = '0'
@@ -118,7 +118,7 @@ def get_product_data(url, category, base_url):
             rating =  str(i + 1)
             break
     
-    img_url = ''
+    img_url = '-'
     try:
         img_url = base_url + soup.find('img')['src'].split('..')[-1]
     except AttributeError:
