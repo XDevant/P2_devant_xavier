@@ -19,19 +19,20 @@ def print_note(counted, saved, expected, url):
     """
     Args:
         Int: the length of the repport
-        Int: the length of the saved repport 
+        Int: the length of the saved repport
         Int: the expected length of the repport
         String: the site's url
     Return: nothing
     """
-    print(f"\n      ** Note: **")
+    print("\n      ** Note: **")
+    plur = plural(counted)
     if saved >= 0:
-        print(f"{saved} row{plural(saved)} detected and reported, expected {expected}")
+        print(f"{saved} row{plur} detected and reported, expected {expected}")
     else:
         if counted >= 0:
-            print(f"{counted} row{plural(counted)} detected but not reported, expected {expected}")
+            print(f"{counted} row{plur} detected, expected {expected}")
         else:
-            print(f"(Unable to count errors and create report, expected {expected}")
+            print(f"(Unable to count errors, expected {expected}")
     print(f"(2 description are missing on {url})")
 
 
@@ -59,7 +60,7 @@ def read_error_dict(err_dict, file):
         dict with int values
         String: file name
     Count errors and prints then on the console
-    Return: 
+    Return:
         (Int, Int) : individual and global error counts
     """
     total_errors = 0

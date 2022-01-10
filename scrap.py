@@ -24,27 +24,25 @@ IMG_FOLDER = BASE_FOLDER + "Img\\"
 """ Path of the folders where extracted data will be saved"""
 
 HEADERS = ["product_page_url",
-            "universal_product_code",
-            "title",
-            "price_including_tax",
-            "price_excluding_tax",
-            "number_available",
-            "product_description",
-            "category",
-            "review_rating",
-            "image_url"]
+           "universal_product_code",
+           "title",
+           "price_including_tax",
+           "price_excluding_tax",
+           "number_available",
+           "product_description",
+           "category",
+           "review_rating",
+           "image_url"]
 
 
 def main_handler(site_url):
     """
     Arg: String: site base url
-        Control Flow function. Fetchs the category URLs, 
+        Control Flow function. Fetchs the category URLs,
         then fetch each product URL to scrap the desired product data.
     Return:
         Dict: with only int values: the result dict
     """
-    saved_data = 0
-    saved_img = 0
     result_dict = {
         'csv_file': 0,
         'saved_line': 0,
@@ -53,16 +51,16 @@ def main_handler(site_url):
         'image_error': 0,
         'category_error': 0
         }
-    
+
     create_folders(CSV_FOLDER, IMG_FOLDER)
     category_urls = get_category_urls(site_url, URL)
     if len(category_urls) == 0:
-        print(f"Unable to extract category urls. Scrapping aborted")
+        print("Unable to extract category urls. Scrapping aborted")
         return result_dict
     for category_url in category_urls:
         category = category_url.split('_')[0].split('/')[-1]
         name = f'{CSV_FOLDER}/{category}.csv'
-        check = save_to_csv(HEADERS, name, mode = 'w')
+        check = save_to_csv(HEADERS, name, mode='w')
         if check == 0:
             print(f"Unable to create CSV file for category {category}")
             result_dict['category_error'] += 1
@@ -119,9 +117,9 @@ def check_extracted_files():
         }
     error_dfs = []
 
-    print(f"    Scaning Data Folders")
+    print("    Scaning Data Folders")
     csv_files, img_files = get_files(CSV_FOLDER, IMG_FOLDER)
-    print(f"    Scaning CSV for inaccurate data")
+    print("    Scaning CSV for inaccurate data")
     for file in csv_files:
         try:
             df = pd.read_csv(file, delimiter="|")
@@ -207,15 +205,13 @@ if __name__ == "__main__":
         'files_with_data_error': 2,
         'total_data_error': 2
         }
-    
-    print(f"\n      *** Starting Extraction ***")
+
+    print("\n      *** Starting Extraction ***")
     result_dict = main_handler(URL)
-    print(f"\n      *** Extraction Results: ***")
+    print("\n      *** Extraction Results: ***")
     print_result(result_dict, expected=expected_main)
-    print(f"\n      *** Checking Extracted Data ***")
+    print("\n      *** Checking Extracted Data ***")
     result_dict = check_extracted_files()
-    print(f"\n      *** Check Results: ***")
+    print("\n      *** Check Results: ***")
     print_result(result_dict, expected=expected_check)
     print('\n')
-
-

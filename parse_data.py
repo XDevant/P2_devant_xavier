@@ -3,10 +3,10 @@ from import_data import get_soup
 
 def get_category_urls(url, base_url):
     """
-    Arg: 
+    Arg:
         String: site's URL
         String: the base URL needed to complete the relative path
-    Return: 
+    Return:
         List of Strings: URLs of each category index page.
     """
     soup = get_soup(url)
@@ -14,11 +14,11 @@ def get_category_urls(url, base_url):
         return []
     soup = soup.find('ul', {'class': 'nav-list'})
     if soup is None:
-        print(f"Unable to find nav container")
+        print("Unable to find nav container")
         return []
     links_soup = soup.findAll('a')
     if len(links_soup) < 2:
-        print(f"No link in nav container")
+        print("No link in nav container")
         return []
     links = []
     for a in links_soup[1:]:
@@ -31,13 +31,13 @@ def get_category_urls(url, base_url):
 
 def get_product_urls(url, base_product):
     """
-    Arg: 
+    Arg:
         String: URL of a book category
         String: the base URL needed to complete the relative path
-    Return: 
+    Return:
         List of Strings: URLs of each product page in the category.
     """
-    next =  True
+    next = True
     next_url = url
     urls = []
     while next:
@@ -83,13 +83,13 @@ def get_data(url, category, base_url):
         soup = soup.find('article', {'class': 'product_page'})
     if soup is None:
         return([], '-')
-    
+
     try:
         title = soup.find('h1').text
     except AttributeError:
         print(f"Title missing for {url} in {category}.csv")
         title = '-'
-    
+
     stock = soup.find('p', {'class': 'instock availability'})
     if stock is None:
         stock = '0'
@@ -99,14 +99,14 @@ def get_data(url, category, base_url):
         except IndexError:
             print(f"Unable to extract stocks: {url} in {category}.csv")
             stock = '0'
-    
+
     tds = soup.findAll('td')
     try:
         tds = [td.text.strip('£') for td in tds[:4]]
     except (AttributeError, IndexError):
         print(f"Missing data in table: {url} in {category}.csv")
         tds = ['-', 0, 0, 0]
-        
+
     description = soup.find('div', {'id': 'product_description'})
     try:
         description = description.find_next_sibling().text
@@ -118,9 +118,9 @@ def get_data(url, category, base_url):
     rating = '0'
     for i in range(5):
         if soup.find('p', {'class': ratings[i]}) is not None:
-            rating =  str(i + 1)
+            rating = str(i + 1)
             break
-    
+
     img_url = '-'
     try:
         img_url = base_url + soup.find('img')['src'].split('..')[-1]
@@ -129,5 +129,6 @@ def get_data(url, category, base_url):
     except IndexError:
         print(f"Corrupt image URL for {url} in {category}.csv")
 
-    return ([url, tds[0], title, tds[2], tds[3], stock, description, category, rating, img_url], img_url)
-
+    return ([url, tds[0], title, tds[2], tds[3], stock,
+            description, category, rating, img_url],
+            img_url)

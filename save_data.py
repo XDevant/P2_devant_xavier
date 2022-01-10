@@ -5,7 +5,7 @@ from import_data import get_url_content
 
 def create_folders(csv_path, image_path):
     """
-    Args: 
+    Args:
         String: the path and name of the folder to create
         String: the path and name of the folder to create
     Creates folders to store data and images.
@@ -20,13 +20,12 @@ def create_folders(csv_path, image_path):
         return 0
 
 
-
 def download_cover(url, image_path):
     """
     Arg:
         String: image url
         String: path of the target folder
-    Download the image and save it in binary file 
+    Download the image and save it in binary file
     Return
         Int: 1 for success 0 for failure
     """
@@ -55,7 +54,7 @@ def save_to_csv(data_list, name, mode='a'):
     """
     answer = 1
     if len(data_list) == 0:
-        data_list = ['-', '-', '-', 0, 0, 0, '-','-', 0, '-']
+        data_list = ['-', '-', '-', 0, 0, 0, '-', '-', 0, '-']
         answer = 0
     row = ("|".join(data_list) + "\n")
     try:
@@ -72,16 +71,16 @@ def build_err_df(df, list_of_keys):
         Panda Dataframe
         dict: with keys used as column names to parse boolean data
     filters rows with errors in df
-    Return: 
+    Return:
         Panda Dataframe: row of input df with errors
     """
     missing = True
     for key in list_of_keys:
         if missing:
-            err_df = df[df[key] == True]
+            err_df = df[df[key]]
             missing = False
         else:
-            err_df = pd.concat([err_df, df[df[key] == True]])
+            err_df = pd.concat([err_df, df[df[key]]])
     return err_df.drop_duplicates()
 
 
@@ -93,7 +92,7 @@ def dfs_concat_to_csv(error_dfs, path, name='error_log.csv'):
     Kwargs:
         name=String : the name of the file to write in
     Concatenates the df and save the result in a csv
-    Return: 
+    Return:
         (int, int) : number of rows to save and saved
     """
     path_name = path.strip('\\')
@@ -105,7 +104,7 @@ def dfs_concat_to_csv(error_dfs, path, name='error_log.csv'):
         if counted == 0:
             return(0, 0)
     except Exception:
-        print(f"Unable to oncat error df")
+        print("Unable to oncat error df")
     else:
         try:
             error_df.to_csv(path + name, sep='|')

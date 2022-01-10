@@ -2,10 +2,11 @@ import requests
 import glob
 from bs4 import BeautifulSoup
 
+
 def get_url_content(url):
     """
     Arg:
-        String: url 
+        String: url
     Given an page url, returns page content in a soup object.
     Return:
         String: HTML code of the requested page or None
@@ -30,7 +31,7 @@ def get_url_content(url):
 def get_soup(url):
     """
     Arg:
-        String: url 
+        String: url
     Given an page url, returns page content in a soup object.
     Return:
         Soup object or None
@@ -40,13 +41,13 @@ def get_soup(url):
         try:
             return BeautifulSoup(content, "html.parser")
         except Exception:
-           print(f"Unable to parse html for {url}")
+            print(f"Unable to parse html for {url}")
     return None
 
 
 def get_files(csv_path, image_path):
     """
-    Args: 
+    Args:
         String: the path to the files to extract
         String: the path to the files to extract
     Fetch the cover and csv files in the storage folders
@@ -61,4 +62,3 @@ def get_files(csv_path, image_path):
     except Exception:
         print("Unable to find extrated data files")
         return ([], [])
-
