@@ -1,6 +1,13 @@
 
 
 def plural(number, text=''):
+    """
+    Args:
+        Int or Float
+    Kwarg:
+        text=String
+    Return: String (text or 's' if number >= 2)
+    """
     if number**2 >= 4:
         if text == '':
             return 's'
@@ -9,6 +16,14 @@ def plural(number, text=''):
 
 
 def print_note(counted, saved, expected, url):
+    """
+    Args:
+        Int: the length of the repport
+        Int: the length of the saved repport 
+        Int: the expected length of the repport
+        String: the site's url
+    Return: nothing
+    """
     print(f"\n      ** Note: **")
     if saved >= 0:
         print(f"{saved} row{plural(saved)} detected and reported, expected {expected}")
@@ -21,7 +36,9 @@ def print_note(counted, saved, expected, url):
 
 
 def print_result(result, expected={}):
-
+    """
+    Return: nothing
+    """
     for key, value in result.items():
         words = key.split('_')
         words = [word.capitalize() for word in words]

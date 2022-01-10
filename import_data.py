@@ -46,7 +46,9 @@ def get_soup(url):
 
 def get_files(csv_path, image_path):
     """
-    Args: No agr
+    Args: 
+        String: the path to the files to extract
+        String: the path to the files to extract
     Fetch the cover and csv files in the storage folders
     Return: a tuple of 2 lists of files(string)
     """

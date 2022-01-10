@@ -58,6 +58,7 @@ def main_handler(site_url):
     category_urls = get_category_urls(site_url, URL)
     if len(category_urls) == 0:
         print(f"Unable to extract category urls. Scrapping aborted")
+        return result_dict
     for category_url in category_urls:
         category = category_url.split('_')[0].split('/')[-1]
         name = f'{CSV_FOLDER}/{category}.csv'
@@ -73,19 +74,22 @@ def main_handler(site_url):
             continue
         for product_url in product_urls:
             (data, image_url) = get_data(product_url, category, URL)
-            if data == []:
+            saved = save_to_csv(data, name)
+            result_dict['saved_line'] += saved
+            if saved == 0:
+                if data == []:
+                    print(f"Data not found for {product_url}")
+                else:
+                    print(f"Data not saved for {product_url}")
                 result_dict['product_error'] += 1
-                print(f"Data not found for {product_url}")
+            if image_url != '-':
+                downloaded = download_cover(image_url, IMG_FOLDER)
+                result_dict['saved_image'] += downloaded
             else:
-                result_dict['saved_line'] += save_to_csv(data, name)
-            if image_url == '-':
+                downloaded = 0
+            if downloaded == 0:
                 result_dict['image_error'] += 1
                 print(f"Image url not found for {product_url}")
-            else:
-                result_dict['saved_image'] += download_cover(
-                                                            image_url,
-                                                            IMG_FOLDER
-                                                            )
         result_dict['csv_file'] += 1
         print(f"Category {category} saved in {category}.csv")
     return result_dict
@@ -205,12 +209,13 @@ if __name__ == "__main__":
         }
     
     print(f"\n      *** Starting Extraction ***")
-    #result_dict = main_handler(URL)
+    result_dict = main_handler(URL)
     print(f"\n      *** Extraction Results: ***")
-    #print_result(result_dict, expected=expected_main)
+    print_result(result_dict, expected=expected_main)
     print(f"\n      *** Checking Extracted Data ***")
     result_dict = check_extracted_files()
     print(f"\n      *** Check Results: ***")
     print_result(result_dict, expected=expected_check)
+    print('\n')
 
 

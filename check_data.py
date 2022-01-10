@@ -22,6 +22,7 @@ def build_error_dict(df, img_files, img_path):
     Args:
         Panda Dataframe
         List of String (file names)
+        String: file path
     Add booléan rows to df after checking data.
     Build repport as error dict.
     Return: 
@@ -83,19 +84,11 @@ def build_error_dict(df, img_files, img_path):
 
     try:
         df['no_title'] = df.apply(
-            lambda row: row['product_page_url']
-                .split('_')[0]
-                .split('/')[-1]
-                .split('-')[0] != ''.join(''.join(''.join(''
-                                        .join(row['title']
-                                            .split(' ')[0]
-                                            .split('-')[0]
-                                            .lower().strip('(,:#.%')
-                                            .split('\'')
-                                            ).split(',')
-                                            ).split('/')
-                                            ).split(')')
-                                            )
+            lambda row: 
+            row['product_page_url'].split('_')[0].split('/')[-1]
+                .split('-')[0] != ''.join(''.join(''.join(''.join(
+                    row['title'].split(' ')[0].lower().strip('(,:#.%')
+                    .split('\'')).split(',')).split('/')).split(')'))
             , axis=1
             )
         err_dict['no_title'] = df[df['no_title'] == True].shape[0]

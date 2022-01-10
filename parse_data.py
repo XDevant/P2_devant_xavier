@@ -5,6 +5,7 @@ def get_category_urls(url, base_url):
     """
     Arg: 
         String: site's URL
+        String: the base URL needed to complete the relative path
     Return: 
         List of Strings: URLs of each category index page.
     """
@@ -32,6 +33,7 @@ def get_product_urls(url, base_product):
     """
     Arg: 
         String: URL of a book category
+        String: the base URL needed to complete the relative path
     Return: 
         List of Strings: URLs of each product page in the category.
     """
@@ -71,6 +73,7 @@ def get_data(url, category, base_url):
     Args:
         String: the URL of a product page.
         String: the book category of the product.
+        String: the base URL needed to complete the relative path
     Return :
         (List of strings, String): the product data we were looking for
          and the url of the book cover image.
