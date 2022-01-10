@@ -65,26 +65,7 @@ def save_to_csv(data_list, name, mode='a'):
         return 0
 
 
-def build_err_df(df, list_of_keys):
-    """
-    Args:
-        Panda Dataframe
-        dict: with keys used as column names to parse boolean data
-    filters rows with errors in df
-    Return:
-        Panda Dataframe: row of input df with errors
-    """
-    missing = True
-    for key in list_of_keys:
-        if missing:
-            err_df = df[df[key]]
-            missing = False
-        else:
-            err_df = pd.concat([err_df, df[df[key]]])
-    return err_df.drop_duplicates()
-
-
-def dfs_concat_to_csv(error_dfs, path, name='error_log.csv'):
+def dfs_to_csv(error_dfs, path, name='error_log.csv'):
     """
     Args:
         List of Panda Dataframe

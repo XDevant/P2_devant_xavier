@@ -1,19 +1,9 @@
 import pandas as pd
 from import_data import get_files
-from parse_data import get_category_urls
-from parse_data import get_product_urls
-from parse_data import get_data
-from save_data import create_folders
-from save_data import download_cover
-from save_data import save_to_csv
-from save_data import build_err_df
-from save_data import dfs_concat_to_csv
-from check_data import check_headers
-from check_data import build_error_dict
-from display_data import plural
-from display_data import read_error_dict
-from display_data import print_result
-from display_data import print_note
+from parse_data import get_category_urls, get_product_urls, get_data
+from save_data import create_folders, download_cover, save_to_csv, dfs_to_csv
+from check_data import check_headers, build_error_dict, build_err_df
+from display_data import plural, read_error_dict, print_result, print_note
 
 URL = "http://books.toscrape.com"
 URL_PRODUCT = URL + '/catalogue'
@@ -176,7 +166,7 @@ def check_extracted_files():
             if parsing_err == 0 and n > 0:
                 result_dict['perfect_book'] += book_count - n
 
-    counted, saved = dfs_concat_to_csv(error_dfs, BASE_FOLDER)
+    counted, saved = dfs_to_csv(error_dfs, BASE_FOLDER)
     expected = 2
     print_note(counted, saved, expected, URL)
     return result_dict

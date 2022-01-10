@@ -1,3 +1,6 @@
+import pandas as pd
+
+
 def check_headers(df, headers, col, file):
     """
     Args:
@@ -31,27 +34,21 @@ def build_error_dict(df, img_files, path):
     err_dict = {}
 
     try:
-        df['no_tax'] = df.apply(
-            lambda row: not row['price_including_tax'] > 0,
-            axis=1)
+        df['no_tax'] = df['price_including_tax'] <= 0
         err_dict['no_tax'] = df[df['no_tax']].shape[0]
     except Exception:
         df['no_tax'] = False
         err_dict['no_tax'] = -1
 
     try:
-        df['no_taxfree'] = df.apply(
-            lambda row: not row['price_excluding_tax'] > 0,
-            axis=1)
+        df['no_taxfree'] = df['price_excluding_tax'] <= 0
         err_dict['no_taxfree'] = df[df['no_taxfree']].shape[0]
     except Exception:
         df['no_taxfree'] = False
         err_dict['no_taxfree'] = -1
 
     try:
-        df['no_stock'] = df.apply(
-            lambda row: not (row['number_available'] > 0),
-            axis=1)
+        df['no_stock'] = df['number_available'] <= 0
         unavailable_df = df[df['no_stock']]
         err_dict['no_stock'] = unavailable_df.shape[0]
     except Exception:
@@ -109,3 +106,22 @@ def build_error_dict(df, img_files, path):
         err_dict['no_cover'] = -1
 
     return (df, err_dict)
+
+
+def build_err_df(df, list_of_keys):
+    """
+    Args:
+        Panda Dataframe
+        dict: with keys used as column names to parse boolean data
+    filters rows with errors in df
+    Return:
+        Panda Dataframe: row of input df with errors
+    """
+    missing = True
+    for key in list_of_keys:
+        if missing:
+            err_df = df[df[key]]
+            missing = False
+        else:
+            err_df = pd.concat([err_df, df[df[key]]])
+    return err_df.drop_duplicates()
