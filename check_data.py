@@ -1,4 +1,5 @@
 import pandas as pd
+from unicodedata import normalize
 
 
 def check_headers(df, headers, col, file):
@@ -73,14 +74,12 @@ def build_error_dict(df, img_files, path):
         df['no_upc'] = False
         err_dict['no_upc'] = -1
 
+    an = '0123456789abcdefghijklmnopqrstuvwxyz'
     try:
-        df['no_title'] = df.apply(
-            lambda r: r['product_page_url']
-            .split('_')[0].split('/')[-1].split('-')[0] != ''
-            .join(''.join(''.join(''.join(
-                r['title'].split(' ')[0].split('-')[0].lower().strip('(,:#.%')
-                          .split('\'')).split(',')).split('/')).split(')')),
-            axis=1)
+        df['no_title'] = df.apply(lambda row: ''.join(
+            [ch for ch in normalize('NFD', row['title']).lower() if ch in an]
+            ) != ''.join(row['product_page_url'].split('_')[0].split('/')[-1]
+                                                .split('-')), axis=1)
         err_dict['no_title'] = df[df['no_title']].shape[0]
     except Exception:
         df['no_title'] = False

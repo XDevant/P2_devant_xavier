@@ -73,9 +73,10 @@ def main_handler(site_url):
             if image_url != '-':
                 downloaded = download_cover(image_url, IMG_FOLDER)
                 result_dict['saved_image'] += downloaded
+                if downloaded == 0:
+                    result_dict['image_error'] += 1
+                    print(f"Unable to save image for {product_url}")
             else:
-                downloaded = 0
-            if downloaded == 0:
                 result_dict['image_error'] += 1
                 print(f"Image url not found for {product_url}")
         result_dict['csv_file'] += 1
@@ -197,9 +198,9 @@ if __name__ == "__main__":
         }
 
     print("\n      *** Starting Extraction ***")
-    result_dict = main_handler(URL)
+    #result_dict = main_handler(URL)
     print("\n      *** Extraction Results: ***")
-    print_result(result_dict, expected=expected_main)
+    #print_result(result_dict, expected=expected_main)
     print("\n      *** Checking Extracted Data ***")
     result_dict = check_extracted_files()
     print("\n      *** Check Results: ***")
