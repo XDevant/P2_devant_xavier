@@ -1,7 +1,6 @@
 /env
 /data
 /Books-to-scrape
-/P2_devant_xavier
 /__pycache__
 test.txt
 scrapold.py
