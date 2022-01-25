@@ -41,10 +41,10 @@ def download_cover(url, image_path):
     return 0
 
 
-def save_to_csv(data_list, name, mode='a'):
+def save_to_csv(data_list, category, path, mode='a'):
     """
     Args:
-        List of Strings (product date),
+        List of Strings (product data),
         String (book category = csv name)
     Kwarg:
         mode=String: "mode"='a' or 'w' (append) by default .
@@ -53,8 +53,9 @@ def save_to_csv(data_list, name, mode='a'):
         Int: 1 for success 0 for failure
     """
     answer = 1
+    name = f'{path}/{category}.csv'
     if len(data_list) == 0:
-        data_list = ['-', '-', '-', 0, 0, 0, '-', '-', 0, '-']
+        data_list = ['-', '-', '-', 0, 0, 0, '-', category, 0, '-']
         answer = 0
     row = ("|".join(data_list) + "\n")
     try:

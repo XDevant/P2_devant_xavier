@@ -49,8 +49,7 @@ def main_handler(site_url):
         return result_dict
     for category_url in category_urls:
         category = category_url.split('_')[0].split('/')[-1]
-        name = f'{CSV_FOLDER}/{category}.csv'
-        check = save_to_csv(HEADERS, name, mode='w')
+        check = save_to_csv(HEADERS, category, CSV_FOLDER, mode='w')
         if check == 0:
             print(f"Unable to create CSV file for category {category}")
             result_dict['category_error'] += 1
@@ -62,7 +61,7 @@ def main_handler(site_url):
             continue
         for product_url in product_urls:
             (data, image_url) = get_data(product_url, category, URL)
-            saved = save_to_csv(data, name)
+            saved = save_to_csv(data, category, CSV_FOLDER)
             result_dict['saved_line'] += saved
             if saved == 0:
                 if data == []:
@@ -198,9 +197,9 @@ if __name__ == "__main__":
         }
 
     print("\n      *** Starting Extraction ***")
-    #result_dict = main_handler(URL)
+    result_dict = main_handler(URL)
     print("\n      *** Extraction Results: ***")
-    #print_result(result_dict, expected=expected_main)
+    print_result(result_dict, expected=expected_main)
     print("\n      *** Checking Extracted Data ***")
     result_dict = check_extracted_files()
     print("\n      *** Check Results: ***")
